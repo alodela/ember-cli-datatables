@@ -1,0 +1,1 @@
+export { default } from 'ember-cli-datatables/components/ember-datatables';

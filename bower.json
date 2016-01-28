@@ -9,8 +9,16 @@
     "ember-qunit": "0.4.16",
     "ember-qunit-notifications": "0.1.0",
     "ember-resolver": "~0.1.20",
-    "jquery": "^1.11.3",
+    "jquery": "~2.1.4",
     "loader.js": "ember-cli/loader.js#3.2.1",
-    "qunit": "~1.20.0"
+    "qunit": "~1.20.0",
+    "datatables.net": "~1.10.10",
+    "datatables.net-bs": "~1.10.10",
+    "pretender": "~0.10.1",
+    "lodash": "~3.7.0",
+    "Faker": "~3.0.0",
+    "datatables.net-scroller": "~1.4.0",
+    "datatables.net-scroller-bs": "~1.4.0",
+    "jquery-mockjax": "2.0.1"
   }
 }

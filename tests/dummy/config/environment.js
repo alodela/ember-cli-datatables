@@ -13,6 +13,10 @@ module.exports = function(environment) {
       }
     },
 
+    contentSecurityPolicy: {
+      'style-src': "'self' 'unsafe-inline'"
+    },
+
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created
@@ -25,6 +29,9 @@ module.exports = function(environment) {
     // ENV.APP.LOG_TRANSITIONS = true;
     // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
     // ENV.APP.LOG_VIEW_LOOKUPS = true;
+    ENV['ember-cli-mirage'] = {
+      enabled: true
+    }  
   }
 
   if (environment === 'test') {

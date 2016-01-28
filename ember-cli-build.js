@@ -13,6 +13,11 @@ module.exports = function(defaults) {
     This build file does *not* influence how the addon or the app using it
     behave. You most likely want to be modifying `./index.js` or app's build file
   */
+  app.import(app.bowerDirectory + '/datatables.net/js/jquery.dataTables.min.js');
+  app.import(app.bowerDirectory + '/datatables.net-bs/css/dataTables.bootstrap.min.css');
+  app.import(app.bowerDirectory + '/datatables.net-bs/js/dataTables.bootstrap.min.js');
+  app.import(app.bowerDirectory + '/datatables.net-scroller/js/dataTables.scroller.min.js');
+  app.import(app.bowerDirectory + '/datatables.net-scroller-bs/css/scroller.bootstrap.min.css');
 
   return app.toTree();
 };
