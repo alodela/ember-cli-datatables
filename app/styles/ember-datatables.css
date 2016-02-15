@@ -1,0 +1,13 @@
+table.dataTable tr td input { width: 95%; }
+
+table.dataTable tbody tr.selected { background-color:#5B759D; color: #fff; }
+
+table.dataTable.stripe tbody tr.odd.selected, table.dataTable.display tbody tr.odd.selected {
+  background-color: #acbad4;
+}
+table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+  background-color: #f6f6f6;
+}
+table.dataTable.hover tbody tr:hover.selected, table.dataTable.display tbody tr:hover.selected {
+  background-color: #5B759D;
+}

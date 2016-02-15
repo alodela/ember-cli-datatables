@@ -16,8 +16,10 @@ module.exports = function(defaults) {
   app.import(app.bowerDirectory + '/datatables.net/js/jquery.dataTables.min.js');
   app.import(app.bowerDirectory + '/datatables.net-bs/css/dataTables.bootstrap.min.css');
   app.import(app.bowerDirectory + '/datatables.net-bs/js/dataTables.bootstrap.min.js');
-  app.import(app.bowerDirectory + '/datatables.net-scroller/js/dataTables.scroller.min.js');
-  app.import(app.bowerDirectory + '/datatables.net-scroller-bs/css/scroller.bootstrap.min.css');
+  app.import(app.bowerDirectory + '/datatables-keytable/js/dataTables.keyTable.js');
+
+  // app.import(app.bowerDirectory + '/datatables.net-scroller/js/dataTables.scroller.min.js');
+  // app.import(app.bowerDirectory + '/datatables.net-scroller-bs/css/scroller.bootstrap.min.css');
 
   return app.toTree();
 };

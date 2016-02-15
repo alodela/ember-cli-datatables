@@ -5,11 +5,13 @@ export default Ember.Controller.extend({
   columns: Ember.computed(function() {
     var codeColumn = ColumnDefinition.create({
       columnName: 'Code',
-      contentPath: 'code'
+      contentPath: 'code',
+      width: '200px'
     });
     var nameColumn = ColumnDefinition.create({
       columnName: 'Name',
-      contentPath: 'name'
+      contentPath: 'name',
+      width: '300px'
     });
     return [codeColumn, nameColumn];
   })

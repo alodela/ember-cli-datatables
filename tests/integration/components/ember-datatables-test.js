@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
-import { generateColumns } from '../../helpers/table-builder';
+import { generateColumns, generateColumnDefinitions } from '../../helpers/table-builder';
 import startMirage from '../../helpers/setup-mirage-for-integration';
 
 // var App;
@@ -20,7 +20,7 @@ test('it renders basic table', function(assert) {
 
   this.render(hbs`{{ember-datatables columns=columns}}`);
 
-  assert.equal(this.$('div.dataTables_scrollHead table.dataTable thead th').length, 2);
+  assert.equal(this.$('.dataTables_scrollBody table.dataTable thead th').length, 2);
 });
 
 test('it renders records from array', function(assert) {
@@ -49,21 +49,27 @@ test('it renders records from promise', function(assert) {
   assert.equal(this.$('table.dataTable tbody tr').length, 10);
 });
 
-/*test('it renders', function(assert) {*/
+test('it renders table with custom cell render function', function(assert) {
+  var columns = generateColumnDefinitions(['Code', 'Name']);
+  var data = [];
   
-  //// Set any properties with this.set('myProperty', 'value');
-  //// Handle any actions with this.on('myAction', function(val) { ... });" + EOL + EOL +
+  // Customize cell render
+  columns[0].getCellContent = function() {
+    return "Custom render 1";
+  };
+  columns[1].getCellContent = function() {
+    return "Custom render 2";
+  };
 
-  //this.render(hbs`{{ember-datatables}}`);
+  data.push(Ember.Object.create(server.create('contact')));
+  data.push(Ember.Object.create(server.create('contact')));
 
-  //assert.equal(this.$().text().trim(), '');
+  this.set('columns', columns);
+  this.set('data', data);
 
-  //// Template block usage:" + EOL +
-  //this.render(hbs`
-    //{{#ember-datatables}}
-      //template block text
-    //{{/ember-datatables}}
-  //`);
+  this.render(hbs`{{ember-datatables columns=columns data=data}}`);
 
-  //assert.equal(this.$().text().trim(), 'template block text');
-/*});*/
+  assert.equal(this.$(this.$('table.dataTable tbody td')[0]).text().trim(), "Custom render 1");
+  assert.equal(this.$(this.$('table.dataTable tbody td')[1]).text().trim(), "Custom render 2");
+});
+

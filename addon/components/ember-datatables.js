@@ -1,16 +1,26 @@
 import Ember from 'ember';
 import layout from '../templates/components/ember-datatables';
 
-export default Ember.Component.extend({
+export default Ember.Component.extend(Ember.Evented, {
   layout: layout,
   tagName: 'table',
   classNames: ['table', 'table-striped', 'table-bordered'],
+	attributeBindings: ['tabIndex'],
 
+	table: null,
+  fixedHeader: null,
   columns: [],  
+	cells: [],
   searching: false,
   ordering: false,
   data: null,
-  scrollY: 200,
+  scrollY: false,
+  autoWidth: true,
+  headerOffset: 0,
+	paging: false,
+
+	dataTablesColumnDefs: Ember.A(),
+	dataTablesColumns: Ember.K,
 
   // _resolvedContent is an intermediate property between content and rows
   // This allows content to be a plain array or a promise resolving to an array
@@ -44,9 +54,22 @@ export default Ember.Component.extend({
     }
   }),
 
-  resolvedDataChanged: Ember.observer('_resolvedData', function() {
-    this.$().DataTable().draw();
+  resolvedDataChanged: Ember.observer('_resolvedData.[]', function() {
+    Ember.run.once(this, 'redraw');
   }),
+
+  redraw: function() {
+    var scrollPos = Ember.$(window).scrollTop();
+    var header = this.get('table').fixedHeader;
+
+		this.removeAllChildren(); 
+    this.$().DataTable().draw();
+
+    setTimeout(function() {
+      Ember.$(window).scrollTop(scrollPos);
+      header.adjust();
+    }, 500);
+  },
 
   dataSource: function() {
     var _this = this;
@@ -68,36 +91,148 @@ export default Ember.Component.extend({
     };
   },
 
-  didInsertElement: function() {
+	willInsertElement: function() {
     var columns = this.get('columns') || Ember.A();
-    var columnsDefinition = [];
+    var columnsDefinition = Ember.A();
+    var columnDefs = Ember.A();
+
+		this.set('cells', Ember.A());
+		var _this = this;
     
-    columns.forEach(function(col) {
+    columns.forEach(function(col, idx) {
       if (typeof col.getColumnDefinition === 'function') {
-        columnsDefinition.push(col.getColumnDefinition());
+				columnsDefinition.push(col.getColumnDefinition());
+
+ 				columnDefs.push({
+					targets: idx,
+					createdCell: function( cell, cellData, rowData ) {
+						var cellClass = _this.container.lookupFactory("component:" + col.get('tableCellViewClass'));
+						if (col.get('template')) {
+            	cellClass = cellClass.extend({template: col.get('template')});
+						}
+            var view = cellClass.create({ row: rowData, column: col, parentView: _this });
+            _this.childViews.pushObject(view);
+						view.appendTo(_this.$(cell));
+						return "";
+					},	
+      		data: function () {
+						return "";
+					}
+				});
       } else {
         columnsDefinition.push(col);
       }
     });
 
-    this.$().DataTable({
-      columns: columnsDefinition,
-      "columnDefs": [{
-        "targets": "_all",
-        "data": function ( row, type, val, meta ) {
-          // if (type == 'display') {
-          return row.get(meta.settings.aoColumns[meta.col].contentPath);
-          // }
-        }
-      }],
+		this.set('dataTablesColumns', columnsDefinition);
+		this.set('dataTablesColumnDefs', columnDefs);
+	},
+
+  didInsertElement: function() {
+    var columnsDefinition = this.get('dataTablesColumns');
+    var customDefs = this.get('dataTablesColumnDefs');
+
+    // Bind events
+    if (this.get('notifier')) {
+      this.get('notifier').on('resize', this, 'onResize');
+    }
+
+    var table = this.$().DataTable({
       ajax: this.dataSource(),
-      serverSide: true,
-      searching: this.get('searching'),
+      autoWidth: this.get('autoWidth'),
+      columnDefs: customDefs,
+      columns: columnsDefinition,
+      fixedHeader: {
+        headerOffset: this.get('headerOffset')
+      },
+      info: false,
+      lengthChange: false,
       ordering: this.get('ordering'),
-      paging: true,
-      scroller: true,
-      scrollY: this.get('scrollY'),
-      lengthChange: false
+      paging: this.get('paging'),
+      searching: this.get('searching'),
+      serverSide: true,
+			scrollY: this.get('scrollY'),
+			deferRender: true,
+			keys: true,
+      language: {
+        emptyTable: "No hay información disponible"
+      }
     });
+
+		var _this = this;
+
+		table
+			.on('key-focus', function(e, datatable, cell) {
+				_this.selectRow(Ember.$(datatable.row(cell.index().row).node()));
+			});
+
+
+    this.$().on('click', 'tbody tr', function(evt) {
+      _this.selectRow(Ember.$(evt.currentTarget));
+    });
+
+		this.set('table', table);
+  },
+
+	willDestroyElement: function() {
+    if (this.get('notifier')) {
+      this.get('notifier').off('resize', this, 'onResize');
+    }
+		this.get('table').destroy();
+	},
+
+  prevRow: function() {
+    this.move('up');
+	},
+
+  nextRow: function() {
+    this.move('down');
+	},
+
+  move: function(key) {
+    var selected      = this.getSelectedRow();
+    var tbody         = this.$().find('tbody');
+		var row						= null;
+
+    switch(key) {
+      case 'up':
+        row = selected.prev();
+				if (row.length === 0) {
+        	row = tbody.find('tr:last-child');
+				}
+        this.selectRow(row);
+        break;
+      case 'down':
+        row = selected.next();
+				if (row.length === 0) {
+	        row = tbody.find('tr:first-child');
+				}
+       	this.selectRow(row);
+        break;
+		}
+	},
+
+  getSelectedRow: function() {
+    return this.$().find('tr.selected:first');
+	},
+
+  selectRow: function(row) {
+    var selected = this.getSelectedRow();
+    if (selected) { selected.removeClass('selected'); }
+
+    if (row) {
+      this._selectedRow = selected = row;
+      if (selected) {
+        selected.addClass('selected');
+        var selectedData = this.$().DataTable().row(row).data();
+				
+				this.sendAction('select', selectedData);
+			}
+		}		
+	},
+
+  onResize: function() {
+    // this.redraw(false);
   }
 });
+
