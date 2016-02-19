@@ -122,7 +122,10 @@ export default Ember.Component.extend(Ember.Evented, {
             return "";
           },  
           data: function (row) {
-            return col.getCellContent(row);
+            if (col.get('template') === undefined && col.get('tableCellViewClass') === undefined) {
+              return col.getCellContent(row);
+            }
+            return "";
           }
         });
       } else {

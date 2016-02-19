@@ -11,7 +11,8 @@ export default Ember.Object.extend({
   render: undefined,
 
   // Override to use a custom view for table cells.
-	tableCellViewClass: 'table-cell',
+  tableCellViewClass: undefined, //'table-cell',
+  template: undefined,
 
   width: '100px',
 
@@ -31,6 +32,18 @@ export default Ember.Object.extend({
     Ember.assert("You must either provide a contentPath or override " +
                  "getCellContent in your column definition", path != null);
     return Ember.get(row, path);
+  },
+
+  getCellView: function(parentView, rowData) {
+    if (this.get('tableCellViewClass') !== undefined || this.get('template') !== undefined) {
+      var cellClassName = this.get('tableCellViewClass') || 'table-cell';
+      var cellClass = parentView.container.lookupFactory("component:" + cellClassName);
+      if (this.get('template')) {
+        cellClass = cellClass.extend({template: this.get('template')});
+      }
+      return cellClass.create({ row: rowData, column: this, parentView: parentView });    
+    }
+    return null;
   },
 
   // Override to update row object value
