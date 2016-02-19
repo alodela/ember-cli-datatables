@@ -184,10 +184,16 @@ export default Ember.Component.extend(Ember.Evented, {
   },
 
   willDestroyElement: function() {
+    var table = this.get('table');
+
     if (this.get('notifier')) {
       this.get('notifier').off('resize', this, 'onResize');
     }
-    this.get('table').destroy();
+
+    table.off('key');
+    table.off('key-focus');
+
+    table.destroy();
   },
 
   prevRow: function() {
