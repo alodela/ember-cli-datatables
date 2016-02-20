@@ -73,8 +73,8 @@ export default Ember.Component.extend(Ember.Evented, {
     setTimeout(function() {
       Ember.$(window).scrollTop(scrollPos);
       header.adjust();
-      _this.selectRow(_this.$().find('tbody tr:first-child'));
       if (_this.get('autofocus')) {
+        _this.selectRow(_this.$().find('tbody tr:first-child'));
         table.cell(':eq(0)').focus();
       }
     }, 500);
