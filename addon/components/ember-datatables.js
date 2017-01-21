@@ -172,6 +172,8 @@ export default Ember.Component.extend(Ember.Evented, {
 
     table
       .on('key-focus', function(e, datatable, cell) {
+        Ember.$(datatable.body()).find('input:focus').blur();
+        Ember.$(cell.node()).find('input:visible:first').focus();
         _this.selectRow(Ember.$(datatable.row(cell.index().row).node()));
       })
       .on('key', function(e, datatable, key, cell, originalEvent) {
