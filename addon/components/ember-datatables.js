@@ -140,6 +140,7 @@ export default Ember.Component.extend(Ember.Evented, {
   didInsertElement: function() {
     var columnsDefinition = this.get('dataTablesColumns');
     var customDefs = this.get('dataTablesColumnDefs');
+    var keys = this.get('keys') || true;
 
     // Bind events
     if (this.get('notifier')) {
@@ -162,7 +163,7 @@ export default Ember.Component.extend(Ember.Evented, {
       serverSide: true,
       scrollY: this.get('scrollY'),
       deferRender: true,
-      keys: true,
+      keys: keys,
       language: {
         emptyTable: "No hay información disponible"
       }
@@ -176,14 +177,6 @@ export default Ember.Component.extend(Ember.Evented, {
         Ember.$(cell.node()).find('input:visible:first').focus();
         _this.selectRow(Ember.$(datatable.row(cell.index().row).node()));
       })
-      .on('key', function(e, datatable, key, cell, originalEvent) {
-        _this.move(key);
-      })
-
-
-    this.$().on('click', 'tbody tr', function(evt) {
-      _this.selectRow(Ember.$(evt.currentTarget));
-    });
 
     this.set('table', table);
   },
